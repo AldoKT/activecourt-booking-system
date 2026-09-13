@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: activecourt_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: website_pemesanan_lapangan
+      MYSQL_USER: activecourt
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - activecourt
+
+  backend:
+    build:
+      context: ./backend
+    container_name: activecourt_backend
+    restart: always
+    command: php artisan serve --host=0.0.0.0 --port=9000
+    volumes:
+      - ./backend:/var/www
+    depends_on:
+      - mysql
+    ports:
+      - "8001:9000"
+    networks:
+      - activecourt
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: activecourt_frontend
+    restart: always
+    command: php artisan serve --host=0.0.0.0 --port=9000
+    volumes:
+      - ./frontend:/var/www
+    depends_on:
+      - backend
+    ports:
+      - "8000:9000"
+    networks:
+      - activecourt
+
+networks:
+  activecourt:
+
+volumes:
+  mysql_data:
